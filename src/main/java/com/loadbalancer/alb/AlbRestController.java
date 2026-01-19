@@ -1,6 +1,7 @@
 package com.loadbalancer.alb;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,23 +13,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class AlbRestController {
 
     private final WebClient webClient;
-    private final ServerListService serverListService;
+    private final ServerInterface serverInterface;
 
-    public AlbRestController(WebClient webClient, ServerListService serverListService) {
+    public AlbRestController(WebClient webClient, ServerInterface serverInterface) {
         this.webClient = webClient;
-        this.serverListService = serverListService;
+        this.serverInterface = serverInterface;
     }
-
-
-
-
 
     @GetMapping("/")
     public String loadbalancer() {
         log.info("AlbRestController.loadbalancer()");
-        String serverUrl = serverListService.serverGet();
-        serverListService.addServer(serverUrl);
-        return webClient.get().uri(serverUrl)
+        return webClient.get().uri(serverInterface.Service())
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
@@ -37,19 +32,3 @@ public class AlbRestController {
 
 
 }
-
-
-
-//        log.info("Request received at / endpoint");
-//        ResponseEntity<String> response =  ResponseEntity.status(HttpStatus.OK).body("OK");
-//        HttpStatus statusCode = (HttpStatus) response.getStatusCode();
-//        return ResponseEntity.ok(
-//                Map.of(
-//                        "serverPort", String.valueOf(request.getLocalPort()),
-//                        "User-Agent", Objects.requireNonNullElse(request.getHeader("User-Agent"), "Unknown"),
-//                        "clientIP", " Recieved Request from " + Objects.requireNonNullElse(request.getRemoteAddr(),"Unknown"),
-//                        "Accept", Objects.requireNonNullElse(request.getHeader("Accept"),"Unknown"),
-//                        "GET /", " Request Method is " + request.getMethod(),
-//                        "statusCode", " Response Status Code is " + statusCode.value(),
-//                        "message", " Hello from ALB! "
-//        ));
